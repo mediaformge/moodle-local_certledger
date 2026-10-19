@@ -55,7 +55,7 @@ final class uninstall_test extends \advanced_testcase {
         $file = local_certledger_export_register();
 
         $this->assertFileExists($file);
-        $rows = array_map('str_getcsv', file($file, FILE_IGNORE_NEW_LINES));
+        $rows = array_map(fn($line) => str_getcsv($line, ',', '"', ''), file($file, FILE_IGNORE_NEW_LINES));
         $this->assertCount(2, $rows);
         $this->assertContains('certnumber', $rows[0]);
         $row = array_combine($rows[0], $rows[1]);

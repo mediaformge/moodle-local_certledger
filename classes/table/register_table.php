@@ -65,23 +65,33 @@ class register_table extends \table_sql {
             $this->set_caption(get_string('register', 'local_certledger'), ['class' => 'visually-hidden']);
         }
 
-        $columns = ['certnumber', 'certcode', 'lastname', 'firstname', 'email', 'coursename', 'certname', 'cohorts',
-            'timeissued', 'status'];
-        $headers = [
-            get_string('certnumber', 'local_certledger'),
-            get_string('certcode', 'local_certledger'),
-            get_string('lastname'),
-            get_string('firstname'),
-            get_string('email'),
-            get_string('course'),
-            get_string('certname', 'local_certledger'),
-            get_string('cohorts', 'local_certledger'),
-            get_string('timeissued', 'local_certledger'),
-            get_string('status', 'local_certledger'),
-        ];
-        if (!$this->is_downloading()) {
-            $columns[] = 'actions';
-            $headers[] = get_string('actions');
+        if ($this->is_downloading()) {
+            $columns = ['certnumber', 'certcode', 'lastname', 'firstname', 'email', 'coursename', 'certname', 'cohorts',
+                'timeissued', 'status'];
+            $headers = [
+                get_string('certnumber', 'local_certledger'),
+                get_string('certcode', 'local_certledger'),
+                get_string('lastname'),
+                get_string('firstname'),
+                get_string('email'),
+                get_string('course'),
+                get_string('certname', 'local_certledger'),
+                get_string('cohorts', 'local_certledger'),
+                get_string('timeissued', 'local_certledger'),
+                get_string('status', 'local_certledger'),
+            ];
+        } else {
+            // On screen the code, the email and the certificate go under the number, the learner and the course.
+            $columns = ['certnumber', 'lastname', 'coursename', 'cohorts', 'timeissued', 'status', 'actions'];
+            $headers = [
+                get_string('certnumber', 'local_certledger'),
+                get_string('learner', 'local_certledger'),
+                get_string('course'),
+                get_string('cohorts', 'local_certledger'),
+                get_string('timeissued', 'local_certledger'),
+                get_string('status', 'local_certledger'),
+                get_string('actions'),
+            ];
         }
         $this->define_columns($columns);
         $this->define_headers($headers);
@@ -166,7 +176,7 @@ class register_table extends \table_sql {
     }
 
     /**
-     * Number column.
+     * Number column; on screen with the printed code below.
      *
      * @param stdClass $row
      * @return string
@@ -175,30 +185,32 @@ class register_table extends \table_sql {
         if ($this->is_downloading()) {
             return $this->text($row->certnumber);
         }
-        return html_writer::tag('strong', s($row->certnumber), ['class' => 'local-certledger-number']);
+        return html_writer::div(s($row->certnumber), 'local-certledger-number fw-bold')
+            . html_writer::div(html_writer::tag('code', s($row->certcode), ['class' => 'local-certledger-code']), 'small');
     }
 
     /**
-     * Printed code column.
+     * Printed code column, in downloads.
      *
      * @param stdClass $row
      * @return string
      */
     public function col_certcode($row) {
-        if ($this->is_downloading()) {
-            return $this->text($row->certcode);
-        }
-        return html_writer::tag('code', s($row->certcode), ['class' => 'local-certledger-code']);
+        return $this->text($row->certcode);
     }
 
     /**
-     * Last name column.
+     * Last name column; on screen the learner, sorted by last name, with the email below.
      *
      * @param stdClass $row
      * @return string
      */
     public function col_lastname($row) {
-        return $this->text($row->lastname);
+        if ($this->is_downloading()) {
+            return $this->text($row->lastname);
+        }
+        return html_writer::div(s(trim($row->firstname . ' ' . $row->lastname)))
+            . html_writer::div(s($row->email), 'small text-muted');
     }
 
     /**
@@ -222,7 +234,7 @@ class register_table extends \table_sql {
     }
 
     /**
-     * Course column.
+     * Course column; on screen with the certificate below.
      *
      * @param stdClass $row
      * @return string
@@ -231,20 +243,19 @@ class register_table extends \table_sql {
         if ($this->is_downloading()) {
             return $this->text($row->coursename);
         }
-        return format_string($row->coursename, true, ['context' => \context_system::instance()]);
+        $context = \context_system::instance();
+        return html_writer::div(format_string($row->coursename, true, ['context' => $context]))
+            . html_writer::div(format_string($row->certname, true, ['context' => $context]), 'small text-muted');
     }
 
     /**
-     * Certificate column.
+     * Certificate column, in downloads.
      *
      * @param stdClass $row
      * @return string
      */
     public function col_certname($row) {
-        if ($this->is_downloading()) {
-            return $this->text($row->certname);
-        }
-        return format_string($row->certname, true, ['context' => \context_system::instance()]);
+        return $this->text($row->certname);
     }
 
     /**
@@ -264,7 +275,8 @@ class register_table extends \table_sql {
      * @return string
      */
     public function col_timeissued($row) {
-        return userdate($row->timeissued, get_string('strftimedatetimeshort', 'langconfig'));
+        $date = userdate($row->timeissued, get_string('strftimedatetimeshort', 'langconfig'));
+        return $this->is_downloading() ? $date : html_writer::span($date, 'local-certledger-date');
     }
 
     /**
@@ -317,11 +329,11 @@ class register_table extends \table_sql {
     public function col_actions($row) {
         if ((int)$row->status === registry::STATUS_ANNULLED && $this->canannul && registry::is_blocked($row)) {
             $url = new moodle_url('/local/certledger/annul.php', ['id' => $row->id]);
-            return html_writer::link(
+            return html_writer::div(html_writer::link(
                 $url,
                 get_string('unblock', 'local_certledger'),
                 ['class' => 'btn btn-sm btn-outline-secondary']
-            );
+            ), 'local-certledger-actions');
         }
         if ((int)$row->status !== registry::STATUS_VALID) {
             return '';
@@ -345,7 +357,7 @@ class register_table extends \table_sql {
                 ['class' => 'btn btn-sm btn-outline-danger']
             );
         }
-        return html_writer::div(implode(' ', $links), 'd-flex gap-1 flex-wrap');
+        return html_writer::div(implode(' ', $links), 'local-certledger-actions d-flex gap-1');
     }
 
     /**

@@ -120,7 +120,7 @@ $statusoptions = [
 echo html_writer::start_tag('form', [
     'method' => 'get',
     'action' => (new moodle_url('/local/certledger/index.php'))->out(false),
-    'class' => 'd-flex flex-wrap gap-3 align-items-end mb-4',
+    'class' => 'local-certledger-filters d-flex flex-wrap gap-3 align-items-end mb-4',
     'role' => 'search',
 ]);
 echo $field(
@@ -161,7 +161,7 @@ echo $field(get_string('search'), 'local-certledger-search', html_writer::empty_
     'name' => 'search',
     'id' => 'local-certledger-search',
     'value' => $filters['search'],
-    'class' => 'form-control',
+    'class' => 'form-control local-certledger-search',
     'placeholder' => get_string('searchplaceholder', 'local_certledger'),
 ]));
 echo html_writer::div(

@@ -40,8 +40,10 @@ Feature: Number the issued certificates and keep them in a ledger
     And I log in as "admin"
     And I navigate to "Reports > Certificate ledger" in site administration
     And the following should exist in the "local-certledger-table" table:
-      | Number      | Code on the certificate | Last name | First name | Course           | Certificate        | Status |
-      | SAFE-000001 | SAFE-000001             | Lovelace  | Ada        | Workplace safety | Safety certificate | Valid  |
+      | Number      | Learner      | Course           | Status |
+      | SAFE-000001 | Ada Lovelace | Workplace safety | Valid  |
+    And "Ada Lovelace" row "Learner" column of "local-certledger-table" table should contain "ada@example.com"
+    And "Ada Lovelace" row "Course" column of "local-certledger-table" table should contain "Safety certificate"
 
   Scenario: A manager searches the ledger
     Given the following "local_certledger > issues" exist:

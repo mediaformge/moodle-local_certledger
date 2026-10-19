@@ -105,7 +105,11 @@ echo $OUTPUT->heading(get_string('annulcertificate', 'local_certledger', $number
 
 $details = [
     get_string('certnumber', 'local_certledger') => $number,
-    get_string('certcode', 'local_certledger') => html_writer::tag('code', s($record->certcode)),
+    get_string('certcode', 'local_certledger') => html_writer::tag(
+        'code',
+        s($record->certcode),
+        ['class' => 'local-certledger-code']
+    ),
     get_string('learner', 'local_certledger') => s(trim($record->firstname . ' ' . $record->lastname)),
     get_string('email') => s($record->email),
     get_string('cohorts', 'local_certledger') => s($record->cohorts),

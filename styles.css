@@ -1,5 +1,17 @@
-/* Certificate Ledger: keep numbers and printed codes on one line in the ledger table. */
+/* Certificate Ledger: keep numbers, codes, dates and actions on one line in the ledger table. */
 .local-certledger-table .local-certledger-number,
-.local-certledger-table .local-certledger-code {
+.local-certledger-table .local-certledger-code,
+.local-certledger-table .local-certledger-date,
+.local-certledger-table .local-certledger-actions {
     white-space: nowrap;
+}
+
+/* The printed code in the text colour. */
+.local-certledger-code {
+    color: inherit;
+}
+
+/* Room for the hint of the search field. */
+.local-certledger-filters .local-certledger-search {
+    min-width: 18rem;
 }
