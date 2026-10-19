@@ -1,0 +1,5 @@
+/* Certificate Ledger: keep numbers and printed codes on one line in the ledger table. */
+.local-certledger-table .local-certledger-number,
+.local-certledger-table .local-certledger-code {
+    white-space: nowrap;
+}
